@@ -1,0 +1,28 @@
+name: Mock assessment grade
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Test stage (01-05, or all)'
+        required: true
+        default: '01'
+        type: choice
+        options: ['01', '02', '03', '04', '05', 'all']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - shell: bash
+        run: |
+          STAGE="${{ inputs.stage }}"
+          if [ "$STAGE" = "all" ]; then
+            python -m pytest -q tests/
+          else
+            python -m pytest -q "tests/test_${STAGE}_"*.py
+          fi
